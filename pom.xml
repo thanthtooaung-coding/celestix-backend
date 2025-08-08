@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.movie</groupId>
 	<artifactId>celestix</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>celestix</name>
 	<description>Theater Management System APIs with Spring Boot</description>
 	<url/>
