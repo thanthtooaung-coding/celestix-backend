@@ -15,13 +15,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User extends MasterData {
 
+    private String name;
+
     private String password;
 
     @Column(unique = true)
     private String email;
-
-    @Column(unique = true)
-    private String phoneNumber;
 
     @Convert(converter = RoleConverter.class)
     private Role role;

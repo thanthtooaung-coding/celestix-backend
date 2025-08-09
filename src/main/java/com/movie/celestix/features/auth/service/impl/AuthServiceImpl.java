@@ -35,9 +35,9 @@ public class AuthServiceImpl implements AuthService {
 
         this.userJpaRepository.save(
                 new User(
+                        request.name(),
                         hashedPassword,
                         request.email(),
-                        request.phoneNumber(),
                         request.role()
                 )
         );
