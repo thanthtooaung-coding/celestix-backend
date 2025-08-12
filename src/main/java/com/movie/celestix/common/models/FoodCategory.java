@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "food_categories")
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
