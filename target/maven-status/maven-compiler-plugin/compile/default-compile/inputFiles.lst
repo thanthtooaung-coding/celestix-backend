@@ -7,10 +7,12 @@
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/enums/Role.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/models/FoodCategory.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/models/MasterData.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/models/MovieGenre.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/models/User.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/repository/jdbc/UserJdbcRepository.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/repository/jdbc/impl/UserJdbcRepositoryImpl.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/repository/jpa/FoodCategoryJpaRepository.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/repository/jpa/MovieGenreJpaRepository.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/repository/jpa/UserJpaRepository.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/auth/controller/AuthController.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/auth/dto/LoginRequest.java
@@ -24,6 +26,13 @@
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/foodcategories/mapper/FoodCategoryMapper.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/foodcategories/service/FoodCategoryService.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/foodcategories/service/impl/FoodCategoryServiceImpl.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/moviegenres/controller/MovieGenreController.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/moviegenres/dto/CreateMovieGenreRequest.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/moviegenres/dto/MovieGenreResponse.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/moviegenres/dto/UpdateMovieGenreRequest.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/moviegenres/mapper/MovieGenreMapper.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/moviegenres/service/MovieGenreService.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/moviegenres/service/impl/MovieGenreServiceImpl.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/movies/controller/MovieController.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/movies/dto/CreateMovieRequest.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/features/movies/dto/UpdateMovieRequest.java
