@@ -2,6 +2,7 @@
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/config/PasswordEncoderConfig.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/config/SecurityConfig.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/config/SwaggerConfig.java
+/home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/controller/WelcomeController.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/converters/RoleConverter.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/enums/Role.java
 /home/alvin/GitHub/celestix/src/main/java/com/movie/celestix/common/models/Category.java

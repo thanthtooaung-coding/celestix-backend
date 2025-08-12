@@ -14,6 +14,7 @@ com/movie/celestix/common/enums/Role.class
 com/movie/celestix/common/models/Category.class
 com/movie/celestix/common/config/SwaggerConfig.class
 com/movie/celestix/common/repository/jpa/UserJpaRepository.class
+com/movie/celestix/common/controller/WelcomeController.class
 com/movie/celestix/features/categories/mapper/CategoryMapper.class
 com/movie/celestix/features/categories/controller/CategoryController.class
 com/movie/celestix/features/movies/controller/MovieController.class
