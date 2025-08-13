@@ -4,6 +4,7 @@ import com.movie.celestix.common.jwt.JwtUtil;
 import com.movie.celestix.common.models.User;
 import com.movie.celestix.common.repository.jdbc.UserJdbcRepository;
 import com.movie.celestix.common.repository.jpa.UserJpaRepository;
+import com.movie.celestix.features.auth.dto.LoginResponse;
 import com.movie.celestix.features.auth.dto.RegisterRequest;
 import com.movie.celestix.features.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +29,13 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
 
     @Override
-    public String authenticate(final String email, final String rawPassword) {
+    public LoginResponse authenticate(final String email, final String rawPassword) {
         this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, rawPassword));
         final UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
-        return this.jwtUtil.generateToken(userDetails);
+        final User user = this.userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        final String token = this.jwtUtil.generateToken(userDetails);
+        return new LoginResponse(token, user.getRole());
     }
 
     @Override

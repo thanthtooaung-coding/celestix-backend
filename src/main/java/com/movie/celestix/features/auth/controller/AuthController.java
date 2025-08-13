@@ -19,8 +19,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody final LoginRequest request) {
-        final String token = this.authService.authenticate(request.email(), request.password());
-        return ApiResponse.ok(new LoginResponse(token), "Login successful");
+        final LoginResponse loginResponse = this.authService.authenticate(request.email(), request.password());
+        return ApiResponse.ok(loginResponse, "Login successful");
     }
 
     @PostMapping("/register")

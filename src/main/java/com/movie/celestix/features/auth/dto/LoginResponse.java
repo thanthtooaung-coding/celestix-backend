@@ -1,3 +1,8 @@
 package com.movie.celestix.features.auth.dto;
 
-public record LoginResponse(String token) {}
+import com.movie.celestix.common.enums.Role;
+
+public record LoginResponse(
+        String token,
+        Role role
+) {}
