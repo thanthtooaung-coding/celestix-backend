@@ -1,9 +1,11 @@
 package com.movie.celestix.features.auth.controller;
 
+import com.movie.celestix.common.dto.ApiResponse;
 import com.movie.celestix.features.auth.dto.LoginRequest;
 import com.movie.celestix.features.auth.dto.RegisterRequest;
 import com.movie.celestix.features.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,18 +17,23 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody final LoginRequest request) {
+    public ResponseEntity<ApiResponse<String>> login(@RequestBody final LoginRequest request) {
         boolean success = this.authService.authenticate(request.email(), request.password());
         if (success) {
-            return ResponseEntity.ok("Login successful");
+            return ApiResponse.ok(null, "Login successful");
         } else {
-            return ResponseEntity.status(401).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.<String>builder()
+                            .code(HttpStatus.UNAUTHORIZED.value())
+                            .message("Invalid email or password")
+                            .build()
+            );
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody final RegisterRequest request) {
+    public ResponseEntity<ApiResponse<Void>> register(@RequestBody final RegisterRequest request) {
         this.authService.register(request);
-        return ResponseEntity.ok("User registered successfully");
+        return ApiResponse.created(null, "User registered successfully");
     }
 }
