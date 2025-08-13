@@ -31,6 +31,7 @@
 		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
 		<org.springdoc.version>2.3.0</org.springdoc.version>
 		<org.projectlombok.mapstruct.version>0.2.0</org.projectlombok.mapstruct.version>
+		<io.jsonwebtoken.version>0.11.5</io.jsonwebtoken.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -74,6 +75,23 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${io.jsonwebtoken.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${io.jsonwebtoken.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${io.jsonwebtoken.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>

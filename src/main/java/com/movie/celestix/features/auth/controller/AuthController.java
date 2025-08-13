@@ -2,6 +2,7 @@ package com.movie.celestix.features.auth.controller;
 
 import com.movie.celestix.common.dto.ApiResponse;
 import com.movie.celestix.features.auth.dto.LoginRequest;
+import com.movie.celestix.features.auth.dto.LoginResponse;
 import com.movie.celestix.features.auth.dto.RegisterRequest;
 import com.movie.celestix.features.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -17,18 +18,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> login(@RequestBody final LoginRequest request) {
-        boolean success = this.authService.authenticate(request.email(), request.password());
-        if (success) {
-            return ApiResponse.ok(null, "Login successful");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.<String>builder()
-                            .code(HttpStatus.UNAUTHORIZED.value())
-                            .message("Invalid email or password")
-                            .build()
-            );
-        }
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody final LoginRequest request) {
+        final String token = this.authService.authenticate(request.email(), request.password());
+        return ApiResponse.ok(new LoginResponse(token), "Login successful");
     }
 
     @PostMapping("/register")
