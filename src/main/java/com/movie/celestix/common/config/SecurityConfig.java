@@ -2,6 +2,7 @@ package com.movie.celestix.common.config;
 
 import com.movie.celestix.common.jwt.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
+    private final CorsFilter corsFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,8 +32,9 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-            http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
