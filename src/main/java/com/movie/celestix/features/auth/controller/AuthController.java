@@ -8,6 +8,7 @@ import com.movie.celestix.features.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,8 +20,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody final LoginRequest request) {
-        final LoginResponse loginResponse = this.authService.authenticate(request.email(), request.password());
-        return ApiResponse.ok(loginResponse, "Login successful");
+        try {
+            final LoginResponse loginResponse = this.authService.authenticate(request.email(), request.password());
+            return ApiResponse.ok(loginResponse, "Login successful");
+        } catch (BadCredentialsException e) {
+            return ApiResponse.unauthorized("Incorrect email or password");
+        }
     }
 
     @PostMapping("/register")
