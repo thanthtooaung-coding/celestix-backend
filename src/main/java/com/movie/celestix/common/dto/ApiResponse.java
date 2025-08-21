@@ -47,4 +47,22 @@ public class ApiResponse<T> {
                         .build()
         );
     }
+
+    public static <T> ResponseEntity<ApiResponse<T>> conflict(String message) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                ApiResponse.<T>builder()
+                        .code(HttpStatus.CONFLICT.value())
+                        .message(message)
+                        .build()
+        );
+    }
+
+    public static <T> ResponseEntity<ApiResponse<T>> unauthorized(String message) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ApiResponse.<T>builder()
+                        .code(HttpStatus.UNAUTHORIZED.value())
+                        .message(message)
+                        .build()
+        );
+    }
 }
