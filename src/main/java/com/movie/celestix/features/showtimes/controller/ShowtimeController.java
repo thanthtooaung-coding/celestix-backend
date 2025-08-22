@@ -1,0 +1,53 @@
+package com.movie.celestix.features.showtimes.controller;
+
+import com.movie.celestix.common.dto.ApiResponse;
+import com.movie.celestix.features.showtimes.dto.CreateShowtimeRequest;
+import com.movie.celestix.features.showtimes.dto.ShowtimeResponse;
+import com.movie.celestix.features.showtimes.dto.ShowtimeTemplateResponse;
+import com.movie.celestix.features.showtimes.dto.UpdateShowtimeRequest;
+import com.movie.celestix.features.showtimes.service.ShowtimeService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/showtimes")
+@RequiredArgsConstructor
+public class ShowtimeController {
+
+    private final ShowtimeService showtimeService;
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<ShowtimeResponse>> create(@RequestBody CreateShowtimeRequest request) {
+        ShowtimeResponse createdShowtime = showtimeService.create(request);
+        return ApiResponse.created(createdShowtime, "Showtime created successfully");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ShowtimeResponse>> retrieveOne(@PathVariable Long id) {
+        return ApiResponse.ok(showtimeService.retrieveOne(id), "Showtime retrieved successfully");
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<ShowtimeResponse>>> retrieveAll() {
+        return ApiResponse.ok(showtimeService.retrieveAll(), "Showtimes retrieved successfully");
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ShowtimeResponse>> update(@PathVariable Long id, @RequestBody UpdateShowtimeRequest request) {
+        return ApiResponse.ok(showtimeService.update(id, request), "Showtime updated successfully");
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+        showtimeService.delete(id);
+        return ApiResponse.noContent("Showtime deleted successfully");
+    }
+
+    @GetMapping("/template")
+    public ResponseEntity<ApiResponse<ShowtimeTemplateResponse>> getShowtimeTemplate() {
+        return ApiResponse.ok(showtimeService.getShowtimeTemplate(), "Showtime template data retrieved successfully");
+    }
+}

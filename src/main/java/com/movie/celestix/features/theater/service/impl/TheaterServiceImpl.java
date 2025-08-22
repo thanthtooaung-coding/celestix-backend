@@ -35,6 +35,7 @@ public class TheaterServiceImpl implements TheaterService {
                 request.basicSeat()
         );
         final Theater theater = theaterMapper.toEntity(request);
+        theater.setCapacity(request.seatConfiguration().row() * request.seatConfiguration().column());
         final Theater savedTheater = this.theaterJpaRepository.save(theater);
         return this.theaterMapper.toDto(savedTheater);
     }
@@ -69,6 +70,10 @@ public class TheaterServiceImpl implements TheaterService {
                 request.basicSeat()
         );
         this.theaterMapper.updateTheaterFromDto(request, theater);
+        int totalCapacity = request.seatConfiguration().row() * request.seatConfiguration().column();
+        if (theater.getCapacity() != totalCapacity) {
+            theater.setCapacity(totalCapacity);
+        }
         final Theater updatedTheater = this.theaterJpaRepository.save(theater);
         return theaterMapper.toDto(updatedTheater);
     }
