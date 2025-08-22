@@ -24,19 +24,19 @@ public record TheaterResponse(
                     rs.getInt("seat_column")
             ),
             new SeatInfoData(
-                    rs.getInt("total_premium_seats"),
+                    rs.getInt("total_premium_rows"),
                     rs.getBigDecimal("total_premium_price")
             ),
             new SeatInfoData(
-                    rs.getInt("total_regular_seats"),
+                    rs.getInt("total_regular_rows"),
                     rs.getBigDecimal("total_regular_price")
             ),
             new SeatInfoData(
-                    rs.getInt("total_economy_seats"),
+                    rs.getInt("total_economy_rows"),
                     rs.getBigDecimal("total_economy_price")
             ),
             new SeatInfoData(
-                    rs.getInt("total_basic_seats"),
+                    rs.getInt("total_basic_rows"),
                     rs.getBigDecimal("total_basic_price")
             )
     );

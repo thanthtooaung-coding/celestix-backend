@@ -21,13 +21,13 @@ public class TheaterJdbcRepositoryImpl implements TheaterJdbcRepository {
             t.location,
             t.seat_row,
             t.seat_column,
-            t.total_premium_seats,
+            t.total_premium_rows,
             t.total_premium_price,
-            t.total_regular_seats,
+            t.total_regular_rows,
             t.total_regular_price,
-            t.total_economy_seats,
+            t.total_economy_rows,
             t.total_economy_price,
-            t.total_basic_seats,
+            t.total_basic_rows,
             t.total_basic_price
         FROM theaters t
         WHERE t.id = ?
@@ -41,13 +41,13 @@ public class TheaterJdbcRepositoryImpl implements TheaterJdbcRepository {
             t.location,
             t.seat_row,
             t.seat_column,
-            t.total_premium_seats,
+            t.total_premium_rows,
             t.total_premium_price,
-            t.total_regular_seats,
+            t.total_regular_rows,
             t.total_regular_price,
-            t.total_economy_seats,
+            t.total_economy_rows,
             t.total_economy_price,
-            t.total_basic_seats,
+            t.total_basic_rows,
             t.total_basic_price
         FROM theaters t
         WHERE t.deleted_at IS NULL
