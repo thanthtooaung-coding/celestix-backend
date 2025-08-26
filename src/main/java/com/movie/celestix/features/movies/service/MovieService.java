@@ -13,4 +13,5 @@ public interface MovieService {
     MovieResponse update(Long id, UpdateMovieRequest request);
     void delete(Long id);
     MovieTemplateResponse getMovieTemplate();
+    List<MovieResponse> retrieveAllByStatus(String status);
 }

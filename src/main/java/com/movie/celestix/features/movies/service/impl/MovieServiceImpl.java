@@ -108,6 +108,15 @@ public class MovieServiceImpl implements MovieService {
         );
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieResponse> retrieveAllByStatus(String status) {
+        MovieStatus movieStatus = getStatusFromString(status);
+        return movieJpaRepository.findAllByStatus(movieStatus).stream()
+                .map(movieMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     private MovieRating getRatingFromString(String ratingString) {
         return Arrays.stream(MovieRating.values())
                 .filter(r -> r.getDisplayName().equalsIgnoreCase(ratingString))

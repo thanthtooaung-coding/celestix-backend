@@ -127,4 +127,42 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Invalid ShowtimeStatus: " + statusString));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GroupedShowtimeResponse> retrieveAllGroupByMovieAndTheater() {
+        List<Showtime> showtimes = showtimeJpaRepository.findAll();
+
+        return showtimes.stream()
+                .collect(Collectors.groupingBy(Showtime::getMovie))
+                .entrySet().stream()
+                .map(movieEntry -> {
+                    Movie movie = movieEntry.getKey();
+                    List<TheaterWithShowtimes> theaters = movieEntry.getValue().stream()
+                            .collect(Collectors.groupingBy(Showtime::getTheater))
+                            .entrySet().stream()
+                            .map(theaterEntry -> {
+                                Theater theater = theaterEntry.getKey();
+                                List<ShowtimeDetail> showtimeDetails = theaterEntry.getValue().stream()
+                                        .map(s -> new ShowtimeDetail(
+                                                s.getId(),
+                                                s.getShowtimeDate(),
+                                                s.getShowtimeTime(),
+                                                s.getSeatsAvailable(),
+                                                s.getStatus().name()
+                                        ))
+                                        .collect(Collectors.toList());
+                                return new TheaterWithShowtimes(
+                                        new TheaterInfo(theater.getId(), theater.getName()),
+                                        showtimeDetails
+                                );
+                            })
+                            .collect(Collectors.toList());
+                    return new GroupedShowtimeResponse(
+                            new MovieInfo(movie.getId(), movie.getTitle()),
+                            theaters
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 }
