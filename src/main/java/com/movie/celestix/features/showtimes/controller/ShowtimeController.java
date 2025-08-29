@@ -1,10 +1,7 @@
 package com.movie.celestix.features.showtimes.controller;
 
 import com.movie.celestix.common.dto.ApiResponse;
-import com.movie.celestix.features.showtimes.dto.CreateShowtimeRequest;
-import com.movie.celestix.features.showtimes.dto.ShowtimeResponse;
-import com.movie.celestix.features.showtimes.dto.ShowtimeTemplateResponse;
-import com.movie.celestix.features.showtimes.dto.UpdateShowtimeRequest;
+import com.movie.celestix.features.showtimes.dto.*;
 import com.movie.celestix.features.showtimes.service.ShowtimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -49,5 +46,14 @@ public class ShowtimeController {
     @GetMapping("/template")
     public ResponseEntity<ApiResponse<ShowtimeTemplateResponse>> getShowtimeTemplate() {
         return ApiResponse.ok(showtimeService.getShowtimeTemplate(), "Showtime template data retrieved successfully");
+    }
+
+    @GetMapping("/movies/{movieId}")
+    public ResponseEntity<ApiResponse<List<GroupedShowtimeResponse>>> getShowtimesByMovie(
+            @PathVariable Long movieId) {
+        return ApiResponse.ok(
+                showtimeService.retrieveByMovieId(movieId),
+                "Showtimes for movie retrieved successfully"
+        );
     }
 }

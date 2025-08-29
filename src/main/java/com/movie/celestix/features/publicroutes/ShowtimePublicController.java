@@ -34,4 +34,13 @@ public class ShowtimePublicController {
         return ApiResponse.ok(showtimeService.retrieveAllGroupByMovieAndTheater(),
                 "Showtimes grouped by movie and theater retrieved successfully");
     }
+
+    @GetMapping("/movies/{movieId}")
+    public ResponseEntity<ApiResponse<List<GroupedShowtimeResponse>>> getShowtimesByMovie(
+            @PathVariable Long movieId) {
+        return ApiResponse.ok(
+                showtimeService.retrieveByMovieId(movieId),
+                "Showtimes for movie retrieved successfully"
+        );
+    }
 }

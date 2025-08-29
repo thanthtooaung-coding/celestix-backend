@@ -6,6 +6,8 @@ import com.movie.celestix.common.repository.jdbc.UserJdbcRepository;
 import com.movie.celestix.common.repository.jpa.UserJpaRepository;
 import com.movie.celestix.features.auth.dto.LoginResponse;
 import com.movie.celestix.features.auth.dto.RegisterRequest;
+import com.movie.celestix.features.auth.dto.UpdateMeRequest;
+import com.movie.celestix.features.auth.dto.UserResponse;
 import com.movie.celestix.features.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,5 +57,27 @@ public class AuthServiceImpl implements AuthService {
                         request.role()
                 )
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getMe(String email) {
+        User user = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateMe(String email, UpdateMeRequest request) {
+        User user = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        if (request.name() != null) {
+            user.setName(request.name());
+        }
+
+        User updatedUser = userJpaRepository.save(user);
+        return new UserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getEmail(), updatedUser.getRole());
     }
 }

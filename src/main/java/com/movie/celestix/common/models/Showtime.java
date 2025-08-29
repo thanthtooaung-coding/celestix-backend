@@ -12,6 +12,8 @@ import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "showtimes")
@@ -42,4 +44,7 @@ public class Showtime extends MasterData {
 
     @Convert(converter = ShowtimeStatusConverter.class)
     private ShowtimeStatus status;
+
+    @OneToMany(mappedBy = "showtime")
+    private Set<BookedSeat> bookedSeats = new HashSet<>();
 }

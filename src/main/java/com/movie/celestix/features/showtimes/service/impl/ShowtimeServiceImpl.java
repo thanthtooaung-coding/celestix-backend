@@ -153,7 +153,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                                         ))
                                         .collect(Collectors.toList());
                                 return new TheaterWithShowtimes(
-                                        new TheaterInfo(theater.getId(), theater.getName()),
+                                        new TheaterInfo(theater.getId(), theater.getName(), theater.getLocation()),
                                         showtimeDetails
                                 );
                             })
@@ -164,5 +164,44 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GroupedShowtimeResponse> retrieveByMovieId(final Long movieId) {
+        final Movie movie = movieJpaRepository.findById(movieId)
+                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + movieId));
+
+        final List<Showtime> showtimes = showtimeJpaRepository.findAll()
+                .stream()
+                .filter(s -> s.getMovie().getId().equals(movieId))
+                .toList();
+
+        final List<TheaterWithShowtimes> theaters = showtimes.stream()
+                .collect(Collectors.groupingBy(Showtime::getTheater))
+                .entrySet().stream()
+                .map(entry -> {
+                    final Theater theater = entry.getKey();
+                    final List<ShowtimeDetail> details = entry.getValue().stream()
+                            .map(s -> new ShowtimeDetail(
+                                    s.getId(),
+                                    s.getShowtimeDate(),
+                                    s.getShowtimeTime(),
+                                    s.getSeatsAvailable(),
+                                    s.getStatus().name()
+                            ))
+                            .collect(Collectors.toList());
+
+                    return new TheaterWithShowtimes(
+                            new TheaterInfo(theater.getId(), theater.getName(), theater.getLocation()),
+                            details
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return List.of(new GroupedShowtimeResponse(
+                new MovieInfo(movie.getId(), movie.getTitle()),
+                theaters
+        ));
     }
 }

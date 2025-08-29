@@ -13,5 +13,6 @@ public interface ShowtimeMapper {
     @Mapping(source = "theater.id", target = "theater.id")
     @Mapping(source = "theater.name", target = "theater.name")
     @Mapping(target = "status", expression = "java(showtime.getStatus().getDisplayName())")
+    @Mapping(target = "bookedSeats", expression = "java(showtime.getBookedSeats().stream().map(com.movie.celestix.common.models.BookedSeat::getSeatNumber).collect(java.util.stream.Collectors.toList()))")
     ShowtimeResponse toDto(Showtime showtime);
 }
