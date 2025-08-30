@@ -4,8 +4,7 @@ import java.util.Arrays;
 
 public enum ShowtimeStatus {
     AVAILABLE(1L, "Available"),
-    SOLD_OUT(2L, "Sold Out"),
-    CANCELLED(3L, "Cancelled");
+    CANCELLED(2L, "Cancelled");
 
     private final Long id;
     private final String displayName;

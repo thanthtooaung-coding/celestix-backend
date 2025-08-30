@@ -32,6 +32,9 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     @Override
     @Transactional
     public ShowtimeResponse create(final CreateShowtimeRequest request) {
+        if (request.showtimeTime().getMinute() % 10 != 0) {
+            throw new IllegalArgumentException("Showtime must be in 10-minute increments.");
+        }
         final Movie movie = movieJpaRepository.findById(request.movieId())
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + request.movieId()));
         final Theater theater = theaterJpaRepository.findById(request.theaterId())
@@ -80,7 +83,6 @@ public class ShowtimeServiceImpl implements ShowtimeService {
             final Theater theater = theaterJpaRepository.findById(request.theaterId())
                     .orElseThrow(() -> new RuntimeException("Theater not found with id: " + request.theaterId()));
             showtime.setTheater(theater);
-            showtime.setSeatsAvailable(theater.getCapacity());
         }
         if (request.showtimeDate() != null) {
             showtime.setShowtimeDate(request.showtimeDate());
