@@ -10,6 +10,8 @@ import com.movie.celestix.features.booking.dto.BookingResponse;
 import com.movie.celestix.features.booking.dto.CreateBookingRequest;
 import com.movie.celestix.features.booking.mapper.BookingMapper;
 import com.movie.celestix.features.booking.service.BookingService;
+import com.movie.celestix.features.email.dto.EmailDetails;
+import com.movie.celestix.features.email.service.EmailService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpEntity;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +42,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookedSeatJpaRepository bookedSeatJpaRepository;
     private final BookingMapper bookingMapper;
     private final ConfigurationJpaRepository configurationJpaRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -119,8 +123,28 @@ public class BookingServiceImpl implements BookingService {
         }
         showtime.setSeatsAvailable(showtime.getSeatsAvailable() - request.seatNumbers().size());
 
-        bookingJpaRepository.save(booking);
+        final Booking savedBooking = bookingJpaRepository.save(booking);
         showtimeJpaRepository.save(showtime);
+
+        if (savedBooking.getPaymentStatus() == PaymentStatus.SUCCESS) {
+            final String seats = savedBooking.getBookedSeats().stream()
+                    .map(BookedSeat::getSeatNumber)
+                    .sorted()
+                    .collect(Collectors.joining(", "));
+
+            final EmailDetails emailDetails = new EmailDetails(
+                    savedBooking.getUser().getName(),
+                    savedBooking.getUser().getEmail(),
+                    savedBooking.getBookingId(),
+                    showtime.getMovie().getTitle(),
+                    showtime.getTheater().getName(),
+                    showtime.getShowtimeDate().format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy")),
+                    showtime.getShowtimeTime().format(DateTimeFormatter.ofPattern("hh:mm a")),
+                    seats,
+                    savedBooking.getTotalPrice()
+            );
+            emailService.sendBookingConfirmationEmail(emailDetails);
+        }
 
         return bookingMapper.toDto(booking);
     }
