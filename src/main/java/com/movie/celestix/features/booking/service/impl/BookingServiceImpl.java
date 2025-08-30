@@ -8,6 +8,7 @@ import com.movie.celestix.common.repository.jpa.BookingJpaRepository;
 import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
 import com.movie.celestix.common.repository.jpa.UserJpaRepository;
 import com.movie.celestix.common.util.CreditCardValidator;
+import com.movie.celestix.features.booking.dto.BookingDetailResponse;
 import com.movie.celestix.features.booking.dto.BookingResponse;
 import com.movie.celestix.features.booking.dto.CreateBookingRequest;
 import com.movie.celestix.features.booking.mapper.BookingMapper;
@@ -67,16 +68,20 @@ public class BookingServiceImpl implements BookingService {
         booking.setPaymentStatus(PaymentStatus.SUCCESS);
 
         final Set<BookedSeat> bookedSeats = new HashSet<>();
+        BigDecimal totalPrice = BigDecimal.ZERO;
         for (String seatNumber : request.seatNumbers()) {
             final BookedSeat bookedSeat = new BookedSeat();
+            BigDecimal price = calculatePrice(showtime.getTheater(), seatNumber);
+            totalPrice = totalPrice.add(price);
             bookedSeat.setBooking(booking);
             bookedSeat.setShowtime(showtime);
             bookedSeat.setSeatNumber(seatNumber);
-            bookedSeat.setPrice(calculatePrice(showtime.getTheater(), seatNumber));
+            bookedSeat.setPrice(price);
             bookedSeats.add(bookedSeat);
         }
 
         booking.setBookedSeats(bookedSeats);
+        booking.setTotalPrice(totalPrice);
         showtime.setSeatsAvailable(showtime.getSeatsAvailable() - request.seatNumbers().size());
 
         bookingJpaRepository.save(booking);
@@ -114,5 +119,27 @@ public class BookingServiceImpl implements BookingService {
         } else {
             return theater.getBasicSeat().getTotalPrice();
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingDetailResponse> retrieveAll() {
+        List<Booking> bookings = bookingJpaRepository.findAll();
+        return bookingMapper.toDetailDtoList(bookings);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        final Booking booking = bookingJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking with id " + id + " not found"));
+
+        if (!booking.getBookedSeats().isEmpty()) {
+            final Showtime showtime = booking.getBookedSeats().iterator().next().getShowtime();
+            showtime.setSeatsAvailable(showtime.getSeatsAvailable() + booking.getBookedSeats().size());
+            showtimeJpaRepository.save(showtime);
+        }
+
+        bookingJpaRepository.deleteById(id);
     }
 }

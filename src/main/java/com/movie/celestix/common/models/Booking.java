@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,4 +39,6 @@ public class Booking extends MasterData {
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<BookedSeat> bookedSeats = new HashSet<>();
+
+    private BigDecimal totalPrice;
 }
