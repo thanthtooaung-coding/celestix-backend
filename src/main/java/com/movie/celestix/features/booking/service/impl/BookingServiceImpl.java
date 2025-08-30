@@ -14,12 +14,20 @@ import com.movie.celestix.features.booking.dto.CreateBookingRequest;
 import com.movie.celestix.features.booking.mapper.BookingMapper;
 import com.movie.celestix.features.booking.service.BookingService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -82,6 +90,29 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setBookedSeats(bookedSeats);
         booking.setTotalPrice(totalPrice);
+
+        String header = "CELESTIX-"+booking.getUser().getName()+request.cardDetails().cardNumber().substring(request.cardDetails().cardNumber().length() - 4);
+
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("PAYMENT-INITIATOR", header.toString());
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        Map<String, Object> body = new HashMap<>();
+        body.put("amount", totalPrice);
+        body.put("currency", "USD");
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, httpHeaders);
+        
+        RestTemplate restTemplate = new RestTemplate();
+        String paymentUrl = "https://aungkhaingkhant.online/test-bank/api/make-payment";
+        Map<String, Object> paymentResponse = restTemplate.postForObject(paymentUrl, entity, Map.class);
+
+        if (!paymentResponse.get("status").equals("SUCCESS")) {
+            ///Return booking failed
+            booking.setPaymentStatus(PaymentStatus.FAIL);
+        }else{
+            ///Return booking success
+            booking.setPaymentStatus(PaymentStatus.SUCCESS);
+        }
         showtime.setSeatsAvailable(showtime.getSeatsAvailable() - request.seatNumbers().size());
 
         bookingJpaRepository.save(booking);
