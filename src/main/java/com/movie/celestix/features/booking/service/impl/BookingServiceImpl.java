@@ -3,10 +3,7 @@ package com.movie.celestix.features.booking.service.impl;
 import com.movie.celestix.common.enums.BookingStatus;
 import com.movie.celestix.common.enums.PaymentStatus;
 import com.movie.celestix.common.models.*;
-import com.movie.celestix.common.repository.jpa.BookedSeatJpaRepository;
-import com.movie.celestix.common.repository.jpa.BookingJpaRepository;
-import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
-import com.movie.celestix.common.repository.jpa.UserJpaRepository;
+import com.movie.celestix.common.repository.jpa.*;
 import com.movie.celestix.common.util.CreditCardValidator;
 import com.movie.celestix.features.booking.dto.BookingDetailResponse;
 import com.movie.celestix.features.booking.dto.BookingResponse;
@@ -41,6 +38,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserJpaRepository userJpaRepository;
     private final BookedSeatJpaRepository bookedSeatJpaRepository;
     private final BookingMapper bookingMapper;
+    private final ConfigurationJpaRepository configurationJpaRepository;
 
     @Override
     @Transactional
@@ -54,6 +52,14 @@ public class BookingServiceImpl implements BookingService {
 
         final User user = userJpaRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        final Configuration config = configurationJpaRepository.findByCode("MAX_BOOKINGS_PER_USER")
+                .orElse(new Configuration("MAX_BOOKINGS_PER_USER", "10"));
+        final int maxBookings = Integer.parseInt(config.getValue());
+
+        if (request.seatNumbers().size() >= maxBookings) {
+            throw new IllegalStateException("You have reached the maximum booking limit of " + maxBookings + ".");
+        }
 
         final Showtime showtime = showtimeJpaRepository.findById(request.showtimeId())
                 .orElseThrow(() -> new RuntimeException("Showtime not found"));
@@ -73,7 +79,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setBookingId(UUID.randomUUID().toString());
         booking.setUser(user);
         booking.setBookingStatus(BookingStatus.CONFIRMED);
-        booking.setPaymentStatus(PaymentStatus.SUCCESS);
+//        booking.setPaymentStatus(PaymentStatus.SUCCESS);
 
         final Set<BookedSeat> bookedSeats = new HashSet<>();
         BigDecimal totalPrice = BigDecimal.ZERO;
@@ -107,10 +113,8 @@ public class BookingServiceImpl implements BookingService {
         Map<String, Object> paymentResponse = restTemplate.postForObject(paymentUrl, entity, Map.class);
 
         if (!paymentResponse.get("status").equals("SUCCESS")) {
-            ///Return booking failed
             booking.setPaymentStatus(PaymentStatus.FAIL);
         }else{
-            ///Return booking success
             booking.setPaymentStatus(PaymentStatus.SUCCESS);
         }
         showtime.setSeatsAvailable(showtime.getSeatsAvailable() - request.seatNumbers().size());
