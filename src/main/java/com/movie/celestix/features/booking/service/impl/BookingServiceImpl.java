@@ -108,8 +108,10 @@ public class BookingServiceImpl implements BookingService {
 
         if (!paymentResponse.get("status").equals("SUCCESS")) {
             ///Return booking failed
+            booking.setPaymentStatus(PaymentStatus.FAIL);
         }else{
             ///Return booking success
+            booking.setPaymentStatus(PaymentStatus.SUCCESS);
         }
         showtime.setSeatsAvailable(showtime.getSeatsAvailable() - request.seatNumbers().size());
 
