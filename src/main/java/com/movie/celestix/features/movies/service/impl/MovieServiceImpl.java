@@ -5,8 +5,10 @@ import com.movie.celestix.common.enums.MovieRating;
 import com.movie.celestix.common.enums.MovieStatus;
 import com.movie.celestix.common.models.Movie;
 import com.movie.celestix.common.models.MovieGenre;
+import com.movie.celestix.common.models.Showtime;
 import com.movie.celestix.common.repository.jpa.MovieGenreJpaRepository;
 import com.movie.celestix.common.repository.jpa.MovieJpaRepository;
+import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
 import com.movie.celestix.features.movies.dto.CreateMovieRequest;
 import com.movie.celestix.features.movies.dto.MovieResponse;
 import com.movie.celestix.features.movies.dto.MovieTemplateResponse;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +35,7 @@ public class MovieServiceImpl implements MovieService {
     private final MovieGenreJpaRepository movieGenreJpaRepository;
     private final MovieMapper movieMapper;
     private final MovieEnumService movieEnumService;
+    private final ShowtimeJpaRepository showtimeJpaRepository;
 
 
     @Override
@@ -115,6 +119,55 @@ public class MovieServiceImpl implements MovieService {
         return movieJpaRepository.findAllByStatus(movieStatus).stream()
                 .map(movieMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieResponse> retrieveAvailableMovies() {
+        final LocalDate today = LocalDate.now();
+        final LocalDate twoDaysFromNow = today.plusDays(2);
+        final List<Movie> moviesWithShowtimes = showtimeJpaRepository.findAll().stream()
+                .filter(showtime -> !showtime.getShowtimeDate().isBefore(today) && !showtime.getShowtimeDate().isAfter(twoDaysFromNow))
+                .map(Showtime::getMovie)
+                .distinct()
+                .toList();
+
+        return moviesWithShowtimes.stream()
+                .map(movieMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MovieResponse> retrieveAllAvailableMoviesByStatus(String status) {
+        final MovieStatus movieStatus = getStatusFromString(status);
+        final List<Movie> moviesByStatus = movieJpaRepository.findAllByStatus(movieStatus);
+        final LocalDate today = LocalDate.now();
+        final LocalDate twoDaysFromNow = today.plusDays(2);
+
+        if (movieStatus == MovieStatus.COMING_SOON) {
+            final List<Long> movieIdsWithFutureShowtimes = showtimeJpaRepository.findAll().stream()
+                    .filter(showtime -> showtime.getShowtimeDate().isAfter(twoDaysFromNow))
+                    .map(showtime -> showtime.getMovie().getId())
+                    .distinct()
+                    .toList();
+
+            return moviesByStatus.stream()
+                    .filter(movie -> movieIdsWithFutureShowtimes.contains(movie.getId()))
+                    .map(movieMapper::toDto)
+                    .collect(Collectors.toList());
+        } else { // NOW_SHOWING
+            final List<Long> movieIdsWithShowtimes = showtimeJpaRepository.findAll().stream()
+                    .filter(showtime -> !showtime.getShowtimeDate().isBefore(today) && !showtime.getShowtimeDate().isAfter(twoDaysFromNow))
+                    .map(showtime -> showtime.getMovie().getId())
+                    .distinct()
+                    .toList();
+
+            return moviesByStatus.stream()
+                    .filter(movie -> movieIdsWithShowtimes.contains(movie.getId()))
+                    .map(movieMapper::toDto)
+                    .collect(Collectors.toList());
+        }
     }
 
     private MovieRating getRatingFromString(String ratingString) {

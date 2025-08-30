@@ -7,6 +7,7 @@ import com.movie.celestix.common.repository.jpa.BookedSeatJpaRepository;
 import com.movie.celestix.common.repository.jpa.BookingJpaRepository;
 import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
 import com.movie.celestix.common.repository.jpa.UserJpaRepository;
+import com.movie.celestix.common.util.CreditCardValidator;
 import com.movie.celestix.features.booking.dto.BookingResponse;
 import com.movie.celestix.features.booking.dto.CreateBookingRequest;
 import com.movie.celestix.features.booking.mapper.BookingMapper;
@@ -35,6 +36,13 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse createBooking(final CreateBookingRequest request, final String userEmail) {
+        if (request.cardDetails() == null) {
+            throw new IllegalArgumentException("Payment details are required.");
+        }
+        if (!CreditCardValidator.isValid(request.cardDetails().cardNumber())) {
+            throw new IllegalArgumentException("Invalid credit card number provided.");
+        }
+
         final User user = userJpaRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

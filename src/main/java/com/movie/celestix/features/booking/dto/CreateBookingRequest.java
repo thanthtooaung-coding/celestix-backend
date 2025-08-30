@@ -4,5 +4,6 @@ import java.util.List;
 
 public record CreateBookingRequest(
         Long showtimeId,
-        List<String> seatNumbers
+        List<String> seatNumbers,
+        CardDetails cardDetails
 ) {}

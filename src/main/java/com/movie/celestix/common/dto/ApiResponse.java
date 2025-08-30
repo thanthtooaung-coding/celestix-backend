@@ -65,4 +65,13 @@ public class ApiResponse<T> {
                         .build()
         );
     }
+
+    public static <T> ResponseEntity<ApiResponse<T>> badRequest(String message) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ApiResponse.<T>builder()
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message(message)
+                        .build()
+        );
+    }
 }

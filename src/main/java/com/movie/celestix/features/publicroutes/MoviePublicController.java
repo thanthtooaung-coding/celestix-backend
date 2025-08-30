@@ -34,9 +34,9 @@ public class MoviePublicController {
     ) {
         List<MovieResponse> movieResponseList;
         if (StringUtils.isBlank(status) || status.equalsIgnoreCase("all") ) {
-            movieResponseList = movieService.retrieveAll();
+            movieResponseList = movieService.retrieveAvailableMovies();
         } else {
-            movieResponseList = movieService.retrieveAllByStatus(status);
+            movieResponseList = movieService.retrieveAllAvailableMoviesByStatus(status);
         }
         return ApiResponse.ok(
                 movieResponseList

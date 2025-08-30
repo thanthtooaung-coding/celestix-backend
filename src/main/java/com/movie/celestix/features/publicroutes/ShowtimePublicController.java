@@ -6,10 +6,7 @@ import com.movie.celestix.features.showtimes.dto.ShowtimeResponse;
 import com.movie.celestix.features.showtimes.service.ShowtimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,8 +27,10 @@ public class ShowtimePublicController {
     }
 
     @GetMapping("/grouped")
-    public ResponseEntity<ApiResponse<List<GroupedShowtimeResponse>>> retrieveAllGroupByMovieAndTheater() {
-        return ApiResponse.ok(showtimeService.retrieveAllGroupByMovieAndTheater(),
+    public ResponseEntity<ApiResponse<List<GroupedShowtimeResponse>>> retrieveAllGroupByMovieAndTheater(
+            @RequestParam(required = false) boolean retrieveAll
+    ) {
+        return ApiResponse.ok(showtimeService.retrieveAllGroupByMovieAndTheater(retrieveAll),
                 "Showtimes grouped by movie and theater retrieved successfully");
     }
 

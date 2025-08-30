@@ -11,6 +11,6 @@ public interface ShowtimeService {
     ShowtimeResponse update(Long id, UpdateShowtimeRequest request);
     void delete(Long id);
     ShowtimeTemplateResponse getShowtimeTemplate();
-    List<GroupedShowtimeResponse> retrieveAllGroupByMovieAndTheater();
+    List<GroupedShowtimeResponse> retrieveAllGroupByMovieAndTheater(boolean retrieveAll);
     List<GroupedShowtimeResponse> retrieveByMovieId(Long movieId);
 }

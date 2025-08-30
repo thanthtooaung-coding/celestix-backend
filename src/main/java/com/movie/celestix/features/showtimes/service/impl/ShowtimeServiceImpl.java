@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -130,8 +131,11 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<GroupedShowtimeResponse> retrieveAllGroupByMovieAndTheater() {
-        List<Showtime> showtimes = showtimeJpaRepository.findAll();
+    public List<GroupedShowtimeResponse> retrieveAllGroupByMovieAndTheater(final boolean retrieveAll) {
+        final LocalDate today = LocalDate.now();
+        final List<Showtime> showtimes = showtimeJpaRepository.findAll().stream()
+                .filter(s -> retrieveAll || s.getShowtimeDate().isEqual(today))
+                .toList();
 
         return showtimes.stream()
                 .collect(Collectors.groupingBy(Showtime::getMovie))

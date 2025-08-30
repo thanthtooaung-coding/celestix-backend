@@ -12,4 +12,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleIllegalStateException(IllegalStateException ex) {
         return ApiResponse.conflict(ex.getMessage());
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ApiResponse.badRequest(ex.getMessage());
+    }
 }
