@@ -4,6 +4,7 @@ import com.cloudinary.utils.StringUtils;
 import com.movie.celestix.common.dto.ApiResponse;
 import com.movie.celestix.features.movies.dto.MovieResponse;
 import com.movie.celestix.features.movies.service.MovieService;
+import com.movie.celestix.features.publicroutes.dto.PopularMovieResponse;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,11 @@ public class MoviePublicController {
         return ApiResponse.ok(
                 movieResponseList
                 , "Movies retrieved successfully");
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<ApiResponse<List<PopularMovieResponse>>> retrievePopularMovies() {
+        List<PopularMovieResponse> popularMovies = movieService.retrievePopularMovies();
+        return ApiResponse.ok(popularMovies, "Popular movies retrieved successfully");
     }
 }

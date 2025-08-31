@@ -6,9 +6,11 @@ import com.movie.celestix.common.enums.MovieStatus;
 import com.movie.celestix.common.models.Movie;
 import com.movie.celestix.common.models.MovieGenre;
 import com.movie.celestix.common.models.Showtime;
+import com.movie.celestix.common.repository.jpa.BookedSeatJpaRepository;
 import com.movie.celestix.common.repository.jpa.MovieGenreJpaRepository;
 import com.movie.celestix.common.repository.jpa.MovieJpaRepository;
 import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
+import com.movie.celestix.features.moviegenres.dto.MovieGenreResponse;
 import com.movie.celestix.features.movies.dto.CreateMovieRequest;
 import com.movie.celestix.features.movies.dto.MovieResponse;
 import com.movie.celestix.features.movies.dto.MovieTemplateResponse;
@@ -16,15 +18,13 @@ import com.movie.celestix.features.movies.dto.UpdateMovieRequest;
 import com.movie.celestix.features.movies.mapper.MovieMapper;
 import com.movie.celestix.features.movies.service.MovieEnumService;
 import com.movie.celestix.features.movies.service.MovieService;
+import com.movie.celestix.features.publicroutes.dto.PopularMovieResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +36,7 @@ public class MovieServiceImpl implements MovieService {
     private final MovieMapper movieMapper;
     private final MovieEnumService movieEnumService;
     private final ShowtimeJpaRepository showtimeJpaRepository;
+    private final BookedSeatJpaRepository bookedSeatJpaRepository;
 
 
     @Override
@@ -172,6 +173,60 @@ public class MovieServiceImpl implements MovieService {
                     .map(movieMapper::toDto)
                     .collect(Collectors.toList());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PopularMovieResponse> retrievePopularMovies() {
+        List<Movie> availableMovies = retrieveAvailableMovies().stream()
+                .map(movieResponse -> movieJpaRepository.findById(movieResponse.id()).orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
+
+        List<BookedSeatJpaRepository.MovieBookingCount> bookingCounts = bookedSeatJpaRepository.countBookingsByMovie();
+
+        Map<Long, Long> bookingCountMap = bookingCounts.stream()
+                .collect(Collectors.toMap(
+                        BookedSeatJpaRepository.MovieBookingCount::getMovieId,
+                        BookedSeatJpaRepository.MovieBookingCount::getBookingCount
+                ));
+
+        long maxBookings = bookingCountMap.values().stream()
+                .mapToLong(Long::longValue)
+                .max()
+                .orElse(1L);
+
+        return availableMovies.stream()
+                .map(movie -> {
+                    long count = bookingCountMap.getOrDefault(movie.getId(), 0L);
+
+                    double popularityRating = 5.0;
+                    if (maxBookings > 0 && count > 0) {
+                        // Scale from 5.0 to 10.0
+                        popularityRating = 5.0 + ((double) count / maxBookings) * 5.0;
+                    }
+                    popularityRating = Math.min(10.0, popularityRating);
+                    popularityRating = Math.round(popularityRating * 10.0) / 10.0;
+
+                    Set<MovieGenreResponse> genres = movie.getGenres().stream()
+                            .map(genre -> new MovieGenreResponse(genre.getId(), genre.getName(), genre.getDescription()))
+                            .collect(Collectors.toSet());
+
+                    return new PopularMovieResponse(
+                            movie.getId(),
+                            movie.getTitle(),
+                            movie.getDescription(),
+                            movie.getDuration(),
+                            movie.getReleaseDate(),
+                            movie.getMoviePosterUrl(),
+                            movie.getTrailerUrl(),
+                            genres,
+                            popularityRating,
+                            movie.getRating().getDisplayName()
+                    );
+                })
+                .sorted(Comparator.comparing(PopularMovieResponse::popularityRating).reversed())
+                .collect(Collectors.toList());
     }
 
     private MovieRating getRatingFromString(String ratingString) {

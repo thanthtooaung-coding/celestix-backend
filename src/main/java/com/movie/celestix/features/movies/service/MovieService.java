@@ -4,6 +4,8 @@ import com.movie.celestix.features.movies.dto.CreateMovieRequest;
 import com.movie.celestix.features.movies.dto.MovieResponse;
 import com.movie.celestix.features.movies.dto.MovieTemplateResponse;
 import com.movie.celestix.features.movies.dto.UpdateMovieRequest;
+import com.movie.celestix.features.publicroutes.dto.PopularMovieResponse;
+
 import java.util.List;
 
 public interface MovieService {
@@ -16,4 +18,5 @@ public interface MovieService {
     List<MovieResponse> retrieveAllByStatus(String status);
     List<MovieResponse> retrieveAvailableMovies();
     List<MovieResponse> retrieveAllAvailableMoviesByStatus(String status);
+    List<PopularMovieResponse> retrievePopularMovies();
 }
