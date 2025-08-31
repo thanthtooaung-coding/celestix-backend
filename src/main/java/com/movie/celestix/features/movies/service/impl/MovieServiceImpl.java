@@ -146,7 +146,7 @@ public class MovieServiceImpl implements MovieService {
         final LocalDate twoDaysFromNow = today.plusDays(2);
 
         if (movieStatus == MovieStatus.COMING_SOON) {
-            final List<Long> movieIdsWithFutureShowtimes = showtimeJpaRepository.findAll().stream()
+            /*final List<Long> movieIdsWithFutureShowtimes = showtimeJpaRepository.findAll().stream()
                     .filter(showtime -> showtime.getShowtimeDate().isAfter(twoDaysFromNow))
                     .map(showtime -> showtime.getMovie().getId())
                     .distinct()
@@ -154,6 +154,10 @@ public class MovieServiceImpl implements MovieService {
 
             return moviesByStatus.stream()
                     .filter(movie -> movieIdsWithFutureShowtimes.contains(movie.getId()))
+                    .map(movieMapper::toDto)
+                    .collect(Collectors.toList());*/
+            return moviesByStatus.stream()
+                    .filter(movie -> movie.getReleaseDate() != null && movie.getReleaseDate().isAfter(twoDaysFromNow))
                     .map(movieMapper::toDto)
                     .collect(Collectors.toList());
         } else { // NOW_SHOWING

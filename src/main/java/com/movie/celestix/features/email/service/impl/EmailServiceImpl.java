@@ -1,6 +1,7 @@
 package com.movie.celestix.features.email.service.impl;
 
 import com.movie.celestix.features.email.dto.EmailDetails;
+import com.movie.celestix.features.email.dto.ReminderEmailDetails;
 import com.movie.celestix.features.email.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -14,6 +15,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +57,34 @@ public class EmailServiceImpl implements EmailService {
             logger.info("Booking confirmation email sent successfully to {}", emailDetails.customerEmail());
         } catch (MessagingException e) {
             logger.error("Failed to send booking confirmation email to {}", emailDetails.customerEmail(), e);
+        }
+    }
+
+    @Override
+    @Async
+    public void sendShowtimeReminderEmail(ReminderEmailDetails emailDetails) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+
+            Context context = new Context();
+            context.setVariable("customerName", emailDetails.customerName());
+            context.setVariable("movieTitle", emailDetails.movieTitle());
+            context.setVariable("moviePosterUrl", emailDetails.moviePosterUrl());
+            context.setVariable("theaterName", emailDetails.theaterName());
+            context.setVariable("showtimeTime", emailDetails.showtimeTime().format(DateTimeFormatter.ofPattern("hh:mm a")));
+
+            String htmlContent = templateEngine.process("showtime-reminder", context);
+
+            helper.setTo(emailDetails.customerEmail());
+            helper.setFrom(mailFrom);
+            helper.setSubject("⏰ Reminder: Your movie '" + emailDetails.movieTitle() + "' is starting soon!");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            logger.info("Showtime reminder email sent successfully to {}", emailDetails.customerEmail());
+        } catch (MessagingException e) {
+            logger.error("Failed to send showtime reminder email to {}", emailDetails.customerEmail(), e);
         }
     }
 }
