@@ -23,5 +23,12 @@ public class ConfigurationInitializer implements CommandLineRunner {
             );
             this.configurationService.saveConfiguration(configuration);
         }
+        if (this.configurationJpaRepository.findByCode("SHOWTIME_SCHEDULER_MINUTES").isEmpty()) {
+            final Configuration configuration = new Configuration(
+                    "SHOWTIME_SCHEDULER_MINUTES",
+                    "10"
+            );
+            this.configurationService.saveConfiguration(configuration);
+        }
     }
 }

@@ -1,9 +1,11 @@
 package com.movie.celestix.features.showtimes.service.impl;
 
 import com.movie.celestix.common.enums.ShowtimeStatus;
+import com.movie.celestix.common.models.Configuration;
 import com.movie.celestix.common.models.Movie;
 import com.movie.celestix.common.models.Showtime;
 import com.movie.celestix.common.models.Theater;
+import com.movie.celestix.common.repository.jpa.ConfigurationJpaRepository;
 import com.movie.celestix.common.repository.jpa.MovieJpaRepository;
 import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
 import com.movie.celestix.common.repository.jpa.TheaterJpaRepository;
@@ -28,12 +30,17 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     private final MovieJpaRepository movieJpaRepository;
     private final TheaterJpaRepository theaterJpaRepository;
     private final ShowtimeMapper showtimeMapper;
+    private final ConfigurationJpaRepository configurationJpaRepository;
 
     @Override
     @Transactional
     public ShowtimeResponse create(final CreateShowtimeRequest request) {
-        if (request.showtimeTime().getMinute() % 10 != 0) {
-            throw new IllegalArgumentException("Showtime must be in 10-minute increments.");
+        final Configuration config = configurationJpaRepository.findByCode("SHOWTIME_SCHEDULER_MINUTES")
+                .orElse(new Configuration("SHOWTIME_SCHEDULER_MINUTES", "10"));
+        final int minuteIncrements = Integer.parseInt(config.getValue());
+
+        if (request.showtimeTime().getMinute() % minuteIncrements != 0) {
+            throw new IllegalArgumentException("Showtime must be in " + minuteIncrements + "-minute increments.");
         }
         final Movie movie = movieJpaRepository.findById(request.movieId())
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + request.movieId()));
