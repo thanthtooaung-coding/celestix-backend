@@ -9,6 +9,7 @@ import com.movie.celestix.features.auth.dto.RegisterRequest;
 import com.movie.celestix.features.auth.dto.UpdateMeRequest;
 import com.movie.celestix.features.auth.dto.UserResponse;
 import com.movie.celestix.features.auth.service.AuthService;
+import com.movie.celestix.features.media.service.MediaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+    private final MediaService mediaService;
 
     @Override
     public LoginResponse authenticate(final String email, final String rawPassword) {
@@ -54,7 +57,8 @@ public class AuthServiceImpl implements AuthService {
                         request.name(),
                         hashedPassword,
                         request.email(),
-                        request.role()
+                        request.role(),
+                        null
                 )
         );
     }
@@ -64,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
     public UserResponse getMe(String email) {
         User user = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
+        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.getProfileUrl());
     }
 
     @Override
@@ -78,6 +82,17 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User updatedUser = userJpaRepository.save(user);
-        return new UserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getEmail(), updatedUser.getRole());
+        return new UserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getEmail(), updatedUser.getRole(), updatedUser.getProfileUrl());
+    }
+
+    @Transactional
+    @Override
+    public UserResponse updateProfilePicture(String email, MultipartFile file) {
+        final User user = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        final String profileUrl = mediaService.store(file);
+        user.setProfileUrl(profileUrl);
+        final User updatedUser = userJpaRepository.save(user);
+        return new UserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getEmail(), updatedUser.getRole(), updatedUser.getProfileUrl());
     }
 }

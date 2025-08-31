@@ -23,8 +23,8 @@ public class MediaServiceImpl implements MediaService {
             options.put("folder", "food_ordering_system");
             @SuppressWarnings("unchecked")
             final Map<String, Object> uploadedFile = cloudinary.uploader().upload(file.getBytes(), options);
-            String publicId = (String) uploadedFile.get("public_id");
-            return cloudinary.url().secure(true).generate(publicId);
+//            String publicId = (String) uploadedFile.get("public_id");
+            return (String) uploadedFile.get("secure_url");
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload to Cloudinary", e);
         }

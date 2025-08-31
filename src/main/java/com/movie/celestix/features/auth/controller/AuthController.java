@@ -10,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -45,5 +46,13 @@ public class AuthController {
             @RequestBody UpdateMeRequest request
     ) {
         return ApiResponse.ok(authService.updateMe(userDetails.getUsername(), request), "User updated successfully");
+    }
+
+    @PostMapping("/me/profile-picture")
+    public ResponseEntity<ApiResponse<UserResponse>> updateProfilePicture(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("file") MultipartFile file
+    ) {
+        return ApiResponse.ok(authService.updateProfilePicture(userDetails.getUsername(), file), "Profile picture updated successfully");
     }
 }

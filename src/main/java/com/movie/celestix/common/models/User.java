@@ -28,4 +28,6 @@ public class User extends MasterData {
 
     @Convert(converter = RoleConverter.class)
     private Role role;
+
+    private String profileUrl;
 }
