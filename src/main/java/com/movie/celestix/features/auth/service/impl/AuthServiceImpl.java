@@ -9,6 +9,8 @@ import com.movie.celestix.features.auth.dto.RegisterRequest;
 import com.movie.celestix.features.auth.dto.UpdateMeRequest;
 import com.movie.celestix.features.auth.dto.UserResponse;
 import com.movie.celestix.features.auth.service.AuthService;
+import com.movie.celestix.features.booking.dto.MyBookingsResponse;
+import com.movie.celestix.features.booking.service.BookingService;
 import com.movie.celestix.features.media.service.MediaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final MediaService mediaService;
+    private final BookingService bookingService;
 
     @Override
     public LoginResponse authenticate(final String email, final String rawPassword) {
@@ -94,5 +97,10 @@ public class AuthServiceImpl implements AuthService {
         user.setProfileUrl(profileUrl);
         final User updatedUser = userJpaRepository.save(user);
         return new UserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getEmail(), updatedUser.getRole(), updatedUser.getProfileUrl());
+    }
+
+    @Override
+    public MyBookingsResponse getMyBookings(String email) {
+        return bookingService.retrieveMyBookings(email);
     }
 }

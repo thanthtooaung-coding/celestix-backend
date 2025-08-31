@@ -8,6 +8,7 @@ import com.movie.celestix.common.util.CreditCardValidator;
 import com.movie.celestix.features.booking.dto.BookingDetailResponse;
 import com.movie.celestix.features.booking.dto.BookingResponse;
 import com.movie.celestix.features.booking.dto.CreateBookingRequest;
+import com.movie.celestix.features.booking.dto.MyBookingsResponse;
 import com.movie.celestix.features.booking.mapper.BookingMapper;
 import com.movie.celestix.features.booking.service.BookingService;
 import com.movie.celestix.features.email.dto.EmailDetails;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -200,5 +203,25 @@ public class BookingServiceImpl implements BookingService {
         }
 
         bookingJpaRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MyBookingsResponse retrieveMyBookings(final String userEmail) {
+        final List<Booking> bookings = bookingJpaRepository.findByUserEmail(userEmail);
+        final List<BookingDetailResponse> allBookings = bookingMapper.toDetailDtoList(bookings);
+
+        final LocalDate now = LocalDate.now();
+        final LocalTime nowTime = LocalTime.now();
+
+        final List<BookingDetailResponse> upcoming = allBookings.stream()
+                .filter(b -> b.showtimeDate().isAfter(now) || (b.showtimeDate().isEqual(now) && b.showtimeTime().isAfter(nowTime)))
+                .collect(Collectors.toList());
+
+        final List<BookingDetailResponse> completed = allBookings.stream()
+                .filter(b -> b.showtimeDate().isBefore(now) || (b.showtimeDate().isEqual(now) && !b.showtimeTime().isAfter(nowTime)))
+                .collect(Collectors.toList());
+
+        return new MyBookingsResponse(upcoming, completed);
     }
 }

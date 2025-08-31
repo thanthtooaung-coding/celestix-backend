@@ -3,6 +3,7 @@ package com.movie.celestix.features.auth.controller;
 import com.movie.celestix.common.dto.ApiResponse;
 import com.movie.celestix.features.auth.dto.*;
 import com.movie.celestix.features.auth.service.AuthService;
+import com.movie.celestix.features.booking.dto.MyBookingsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,5 +55,10 @@ public class AuthController {
             @RequestParam("file") MultipartFile file
     ) {
         return ApiResponse.ok(authService.updateProfilePicture(userDetails.getUsername(), file), "Profile picture updated successfully");
+    }
+
+    @GetMapping("/me/bookings")
+    public ResponseEntity<ApiResponse<MyBookingsResponse>> getMyBookings(@AuthenticationPrincipal UserDetails userDetails) {
+        return ApiResponse.ok(authService.getMyBookings(userDetails.getUsername()), "User bookings retrieved successfully");
     }
 }
