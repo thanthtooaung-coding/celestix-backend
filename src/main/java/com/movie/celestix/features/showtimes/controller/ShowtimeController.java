@@ -56,4 +56,12 @@ public class ShowtimeController {
                 "Showtimes for movie retrieved successfully"
         );
     }
+
+    @GetMapping("/check-conflicts")
+    public ResponseEntity<ApiResponse<List<ShowtimeConflictResponse>>> checkConflicts(@RequestParam int newInterval) {
+        return ApiResponse.ok(
+                showtimeService.findConflictingShowtimes(newInterval),
+                "Conflict check completed successfully"
+        );
+    }
 }

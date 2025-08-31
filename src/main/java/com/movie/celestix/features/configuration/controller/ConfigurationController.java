@@ -25,4 +25,10 @@ public class ConfigurationController {
         configurationService.updateConfiguration(code, request);
         return ApiResponse.ok(null, "Configuration updated successfully");
     }
+
+    @PutMapping("/{code}/update-and-fix")
+    public ResponseEntity<ApiResponse<Void>> updateAndFix(@PathVariable String code, @RequestBody UpdateConfigurationRequest request) {
+        configurationService.updateAndFixShowtimes(code, request);
+        return ApiResponse.ok(null, "Configuration updated and showtimes fixed successfully");
+    }
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,13 +36,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     @Override
     @Transactional
     public ShowtimeResponse create(final CreateShowtimeRequest request) {
-        final Configuration config = configurationJpaRepository.findByCode("SHOWTIME_SCHEDULER_MINUTES")
-                .orElse(new Configuration("SHOWTIME_SCHEDULER_MINUTES", "10"));
-        final int minuteIncrements = Integer.parseInt(config.getValue());
-
-        if (request.showtimeTime().getMinute() % minuteIncrements != 0) {
-            throw new IllegalArgumentException("Showtime must be in " + minuteIncrements + "-minute increments.");
-        }
+        validateShowtimeSchedulerMinutes(request.showtimeTime());
         final Movie movie = movieJpaRepository.findById(request.movieId())
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + request.movieId()));
         final Theater theater = theaterJpaRepository.findById(request.theaterId())
@@ -95,6 +90,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
             showtime.setShowtimeDate(request.showtimeDate());
         }
         if (request.showtimeTime() != null) {
+            validateShowtimeSchedulerMinutes(request.showtimeTime());
             showtime.setShowtimeTime(request.showtimeTime());
         }
         if (request.status() != null) {
@@ -216,5 +212,34 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 new MovieInfo(movie.getId(), movie.getTitle()),
                 theaters
         ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ShowtimeConflictResponse> findConflictingShowtimes(final int newInterval) {
+        final LocalDate today = LocalDate.now();
+        final LocalTime now = LocalTime.now();
+
+        return showtimeJpaRepository.findAll().stream()
+                .filter(st -> st.getShowtimeDate().isAfter(today) || (st.getShowtimeDate().isEqual(today) && st.getShowtimeTime().isAfter(now)))
+                .filter(st -> st.getBookedSeats() == null || st.getBookedSeats().isEmpty())
+                .filter(st -> st.getShowtimeTime().getMinute() % newInterval != 0)
+                .map(st -> new ShowtimeConflictResponse(
+                        st.getMovie().getTitle(),
+                        st.getTheater().getName(),
+                        st.getShowtimeDate(),
+                        st.getShowtimeTime()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private void validateShowtimeSchedulerMinutes(final LocalTime showtimeTime) {
+        final Configuration config = configurationJpaRepository.findByCode("SHOWTIME_SCHEDULER_MINUTES")
+                .orElse(new Configuration("SHOWTIME_SCHEDULER_MINUTES", "10"));
+        final int minuteIncrements = Integer.parseInt(config.getValue());
+
+        if (showtimeTime.getMinute() % minuteIncrements != 0) {
+            throw new IllegalArgumentException("Showtime must be in " + minuteIncrements + "-minute increments.");
+        }
     }
 }

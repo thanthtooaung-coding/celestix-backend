@@ -1,7 +1,9 @@
 package com.movie.celestix.features.configuration.service.impl;
 
 import com.movie.celestix.common.models.Configuration;
+import com.movie.celestix.common.models.Showtime;
 import com.movie.celestix.common.repository.jpa.ConfigurationJpaRepository;
+import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
 import com.movie.celestix.features.configuration.dto.ConfigurationResponse;
 import com.movie.celestix.features.configuration.dto.UpdateConfigurationRequest;
 import com.movie.celestix.features.configuration.service.ConfigurationService;
@@ -10,12 +12,17 @@ import org.quartz.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ConfigurationServiceImpl implements ConfigurationService {
 
     private final ConfigurationJpaRepository configurationJpaRepository;
     private final Scheduler scheduler;
+    private final ShowtimeJpaRepository showtimeJpaRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -44,6 +51,35 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public void saveConfiguration(Configuration configuration) {
         configurationJpaRepository.save(configuration);
+    }
+
+    @Override
+    @Transactional
+    public void updateAndFixShowtimes(String code, UpdateConfigurationRequest request) {
+        if (!"SHOWTIME_SCHEDULER_MINUTES".equals(code)) {
+            throw new IllegalArgumentException("This operation is only supported for SHOWTIME_SCHEDULER_MINUTES");
+        }
+
+        final int newInterval = Integer.parseInt(request.value());
+        final LocalDate today = LocalDate.now();
+        final LocalTime now = LocalTime.now();
+
+        final List<Showtime> conflicts = showtimeJpaRepository.findAll().stream()
+                .filter(st -> st.getShowtimeDate().isAfter(today) || (st.getShowtimeDate().isEqual(today) && st.getShowtimeTime().isAfter(now)))
+                .filter(st -> st.getBookedSeats() == null || st.getBookedSeats().isEmpty())
+                .filter(st -> st.getShowtimeTime().getMinute() % newInterval != 0)
+                .toList();
+
+        for (Showtime showtime : conflicts) {
+            final LocalTime oldTime = showtime.getShowtimeTime();
+            final int oldMinute = oldTime.getMinute();
+            final int newMinute = oldMinute - (oldMinute % newInterval);
+            final LocalTime newTime = oldTime.withMinute(newMinute).withSecond(0).withNano(0);
+            showtime.setShowtimeTime(newTime);
+        }
+        showtimeJpaRepository.saveAll(conflicts);
+
+        updateConfiguration(code, request);
     }
 
     private void rescheduleShowtimeReminderJob(int minutes) {

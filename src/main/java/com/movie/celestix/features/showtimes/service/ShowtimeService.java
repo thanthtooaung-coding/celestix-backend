@@ -13,4 +13,5 @@ public interface ShowtimeService {
     ShowtimeTemplateResponse getShowtimeTemplate();
     List<GroupedShowtimeResponse> retrieveAllGroupByMovieAndTheater(boolean retrieveAll);
     List<GroupedShowtimeResponse> retrieveByMovieId(Long movieId);
+    List<ShowtimeConflictResponse> findConflictingShowtimes(int newInterval);
 }

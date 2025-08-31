@@ -8,4 +8,5 @@ public interface ConfigurationService {
     ConfigurationResponse getConfigurationByCode(String code);
     void updateConfiguration(String code, UpdateConfigurationRequest request);
     void saveConfiguration(Configuration configuration);
+    void updateAndFixShowtimes(String code, UpdateConfigurationRequest request);
 }
