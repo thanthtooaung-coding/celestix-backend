@@ -23,5 +23,6 @@ public class Food extends MasterData {
     private double price;
     private String allergens;
     private String description;
+    private String photoUrl;
 
 }

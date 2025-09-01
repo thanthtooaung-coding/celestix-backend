@@ -35,6 +35,7 @@ public class FoodService {
         food.setCategory(ff.getCategory());
         food.setAllergens(ff.getAllergens());
         food.setDescription(ff.getDescription());
+        food.setPhotoUrl(ff.getPhotoUrl());
         foodRepo.save(food);
     }
 
@@ -46,6 +47,7 @@ public class FoodService {
             food.setCategory(ff.getCategory());
             food.setAllergens(ff.getAllergens());
             food.setDescription(ff.getDescription());
+            food.setPhotoUrl(ff.getPhotoUrl());
             foodRepo.save(food);
         }
     }
@@ -79,7 +81,7 @@ public class FoodService {
         return comboRepo.findById(id);
     }
 
-    public Combo createCombo(String comboName, List<Long> foodIds) {
+    public Combo createCombo(String comboName, List<Long> foodIds, String photoUrl) {
         // ✅ Validation rules
         if (foodIds.size() < 2) {
             throw new IllegalArgumentException("A combo must have at least 2 food items.");
@@ -115,7 +117,7 @@ public class FoodService {
         combo.setComboName(comboName);
         combo.setFoods(selectedFoods); // ✅ keeps duplicates
         combo.setComboPrice(finalPrice);
-
+        combo.setPhotoUrl(photoUrl);
         return comboRepo.save(combo);
     }
 

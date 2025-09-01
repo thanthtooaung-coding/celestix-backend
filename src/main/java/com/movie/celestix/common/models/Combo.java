@@ -17,6 +17,8 @@ public class Combo extends MasterData {
 
     private double comboPrice; // sum of all selected foods
 
+    private String photoUrl;
+
     @ManyToMany
     @JoinTable(name = "combo_foods", joinColumns = @JoinColumn(name = "combo_id"), inverseJoinColumns = @JoinColumn(name = "food_id"))
     private List<Food> foods = new ArrayList<>();

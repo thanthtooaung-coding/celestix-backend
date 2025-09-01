@@ -94,9 +94,10 @@ public class FoodController {
     @PostMapping("/combos")
     public ResponseEntity<?> createCombo(
             @RequestParam String comboName,
-            @RequestBody List<Long> foodIds) {
+            @RequestBody List<Long> foodIds,
+            @RequestParam String photoUrl) {
         try {
-            Combo combo = foodService.createCombo(comboName, foodIds);
+            Combo combo = foodService.createCombo(comboName, foodIds, photoUrl);
             return ResponseEntity.ok(combo);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
