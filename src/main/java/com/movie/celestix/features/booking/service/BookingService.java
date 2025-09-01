@@ -12,4 +12,5 @@ public interface BookingService {
     List<BookingDetailResponse> retrieveAll();
     void delete(Long id);
     MyBookingsResponse retrieveMyBookings(String userEmail);
+    void cancelBooking(Long id, String username);
 }

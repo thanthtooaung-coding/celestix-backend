@@ -25,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -223,5 +224,34 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
 
         return new MyBookingsResponse(upcoming, completed);
+    }
+
+    @Override
+    @Transactional
+    public void cancelBooking(Long id, String userEmail) {
+        final Booking booking = bookingJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking with id " + id + " not found"));
+
+        if (!booking.getUser().getEmail().equals(userEmail)) {
+            throw new IllegalStateException("You are not authorized to cancel this booking.");
+        }
+
+        final Configuration config = configurationJpaRepository.findByCode("CANCELLATION_MINUTES")
+                .orElse(new Configuration("CANCELLATION_MINUTES", "15"));
+        final int cancellationMinutes = Integer.parseInt(config.getValue());
+
+        final Showtime showtime = booking.getBookedSeats().iterator().next().getShowtime();
+        final LocalDateTime showtimeDateTime = LocalDateTime.of(showtime.getShowtimeDate(), showtime.getShowtimeTime());
+        final LocalDateTime now = LocalDateTime.now();
+
+        if (now.isAfter(showtimeDateTime.minusMinutes(cancellationMinutes))) {
+            throw new IllegalStateException("You can only cancel a booking up to " + cancellationMinutes + " minutes before the showtime.");
+        }
+
+        booking.setBookingStatus(BookingStatus.CANCELLED);
+        showtime.setSeatsAvailable(showtime.getSeatsAvailable() + booking.getBookedSeats().size());
+
+        bookingJpaRepository.save(booking);
+        showtimeJpaRepository.save(showtime);
     }
 }

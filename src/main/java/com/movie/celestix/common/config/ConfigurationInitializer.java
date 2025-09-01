@@ -30,5 +30,12 @@ public class ConfigurationInitializer implements CommandLineRunner {
             );
             this.configurationService.saveConfiguration(configuration);
         }
+        if (this.configurationJpaRepository.findByCode("CANCELLATION_MINUTES").isEmpty()) {
+            final Configuration configuration = new Configuration(
+                    "CANCELLATION_MINUTES",
+                    "15"
+            );
+            this.configurationService.saveConfiguration(configuration);
+        }
     }
 }

@@ -39,4 +39,13 @@ public class BookingController {
         bookingService.delete(id);
         return ApiResponse.noContent("Booking deleted successfully");
     }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<Void>> cancelBooking(
+            @PathVariable final Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        bookingService.cancelBooking(id, userDetails.getUsername());
+        return ApiResponse.ok(null, "Booking cancelled successfully");
+    }
 }
