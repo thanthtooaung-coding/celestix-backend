@@ -216,11 +216,13 @@ public class BookingServiceImpl implements BookingService {
         final LocalTime nowTime = LocalTime.now();
 
         final List<BookingDetailResponse> upcoming = allBookings.stream()
+                .filter(b -> b.status().equals(BookingStatus.CONFIRMED.getDisplayName()))
                 .filter(b -> b.showtimeDate().isAfter(now) || (b.showtimeDate().isEqual(now) && b.showtimeTime().isAfter(nowTime)))
                 .collect(Collectors.toList());
 
         final List<BookingDetailResponse> completed = allBookings.stream()
-                .filter(b -> b.showtimeDate().isBefore(now) || (b.showtimeDate().isEqual(now) && !b.showtimeTime().isAfter(nowTime)))
+                .filter(b -> b.status().equals(BookingStatus.CANCELLED.getDisplayName())
+                                || b.showtimeDate().isBefore(now) || (b.showtimeDate().isEqual(now) && !b.showtimeTime().isAfter(nowTime)))
                 .collect(Collectors.toList());
 
         return new MyBookingsResponse(upcoming, completed);
