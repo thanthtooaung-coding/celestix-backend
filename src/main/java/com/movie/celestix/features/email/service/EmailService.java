@@ -7,4 +7,5 @@ public interface EmailService {
     void sendBookingConfirmationEmail(EmailDetails emailDetails);
     void sendShowtimeReminderEmail(ReminderEmailDetails emailDetails);
     void sendOtpEmail(String to, String otp);
+    void sendRefundStatusEmail(String to, String customerName, String bookingId, String status);
 }

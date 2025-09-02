@@ -111,4 +111,30 @@ public class EmailServiceImpl implements EmailService {
             logger.error("Failed to send password reset OTP email to {}", to, e);
         }
     }
+
+    @Override
+    @Async
+    public void sendRefundStatusEmail(String to, String customerName, String bookingId, String status) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+
+            Context context = new Context();
+            context.setVariable("customerName", customerName);
+            context.setVariable("bookingId", bookingId);
+            context.setVariable("status", status);
+
+            String htmlContent = templateEngine.process("refund-status", context);
+
+            helper.setTo(to);
+            helper.setFrom(mailFrom);
+            helper.setSubject("Update on Your Celestix Refund Request");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            logger.info("Refund status email sent to {}", to);
+        } catch (MessagingException e) {
+            logger.error("Failed to send refund status email to {}", to, e);
+        }
+    }
 }

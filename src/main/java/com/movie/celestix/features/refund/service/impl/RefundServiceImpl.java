@@ -8,6 +8,7 @@ import com.movie.celestix.common.models.User;
 import com.movie.celestix.common.repository.jpa.BookingJpaRepository;
 import com.movie.celestix.common.repository.jpa.BookingRefundRecordJpaRepository;
 import com.movie.celestix.common.repository.jpa.UserJpaRepository;
+import com.movie.celestix.features.email.service.EmailService;
 import com.movie.celestix.features.refund.dto.RefundResponse;
 import com.movie.celestix.features.refund.dto.UpdateRefundStatusRequest;
 import com.movie.celestix.features.refund.mapper.RefundMapper;
@@ -27,7 +28,7 @@ public class RefundServiceImpl implements RefundService {
     private final BookingJpaRepository bookingJpaRepository;
     private final UserJpaRepository userJpaRepository;
     private final RefundMapper refundMapper;
-
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -72,6 +73,14 @@ public class RefundServiceImpl implements RefundService {
         }
 
         refundRepository.save(refundRecord);
+
+        final Booking booking = refundRecord.getBooking();
+        final String customerName = booking.getUser().getName();
+        final String customerEmail = booking.getUser().getEmail();
+        final String bookingId = booking.getBookingId();
+        final String status = request.status().getDisplayName();
+
+        emailService.sendRefundStatusEmail(customerEmail, customerName, bookingId, status);
     }
 
     @Override
