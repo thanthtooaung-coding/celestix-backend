@@ -3,12 +3,14 @@ package com.movie.celestix.features.booking.mapper;
 import com.movie.celestix.common.models.BookedSeat;
 import com.movie.celestix.common.models.Booking;
 import com.movie.celestix.common.models.Showtime;
+import com.movie.celestix.common.repository.jpa.BookingRefundRecordJpaRepository;
 import com.movie.celestix.features.booking.dto.BookedSeatDto;
 import com.movie.celestix.features.booking.dto.BookingDetailResponse;
 import com.movie.celestix.features.booking.dto.BookingResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -17,13 +19,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
-public interface BookingMapper {
+public abstract class BookingMapper {
+
+    @Autowired
+    protected BookingRefundRecordJpaRepository refundRecordJpaRepository;
 
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "totalPrice", target = "totalPrice")
-    BookingResponse toDto(Booking booking);
+    public abstract BookingResponse toDto(Booking booking);
 
-    BookedSeatDto toDto(BookedSeat bookedSeat);
+    public abstract BookedSeatDto toDto(BookedSeat bookedSeat);
 
     @Mapping(target = "customerName", source = "user.name")
     @Mapping(target = "customerEmail", source = "user.email")
@@ -37,12 +42,13 @@ public interface BookingMapper {
     @Mapping(target = "showtimeDate", source = "booking", qualifiedByName = "showtimeDateFromBooking")
     @Mapping(target = "showtimeTime", source = "booking", qualifiedByName = "showtimeTimeFromBooking")
     @Mapping(target = "totalAmount", source = "totalPrice")
-    BookingDetailResponse toDetailDto(Booking booking);
+    @Mapping(target = "isAlreadyRequestRefund", expression = "java(refundRecordJpaRepository.findByBookingId(booking.getId()).isPresent())")
+    public abstract BookingDetailResponse toDetailDto(Booking booking);
 
-    List<BookingDetailResponse> toDetailDtoList(List<Booking> bookings);
+    public abstract List<BookingDetailResponse> toDetailDtoList(List<Booking> bookings);
 
     @Named("bookedSeatsToString")
-    default String bookedSeatsToString(Set<BookedSeat> bookedSeats) {
+    public String bookedSeatsToString(Set<BookedSeat> bookedSeats) {
         if (bookedSeats == null || bookedSeats.isEmpty()) {
             return "";
         }
@@ -53,7 +59,7 @@ public interface BookingMapper {
     }
 
     @Named("getShowtimeFromBooking")
-    default Showtime getShowtimeFromBooking(Booking booking) {
+    public Showtime getShowtimeFromBooking(Booking booking) {
         if (booking == null || booking.getBookedSeats() == null || booking.getBookedSeats().isEmpty()) {
             return null;
         }
@@ -61,25 +67,25 @@ public interface BookingMapper {
     }
 
     @Named("movieTitleFromBooking")
-    default String movieTitleFromBooking(Booking booking) {
+    public String movieTitleFromBooking(Booking booking) {
         Showtime showtime = getShowtimeFromBooking(booking);
         return (showtime != null && showtime.getMovie() != null) ? showtime.getMovie().getTitle() : null;
     }
 
     @Named("showtimeDateFromBooking")
-    default java.time.LocalDate showtimeDateFromBooking(Booking booking) {
+    public java.time.LocalDate showtimeDateFromBooking(Booking booking) {
         Showtime showtime = getShowtimeFromBooking(booking);
         return (showtime != null) ? showtime.getShowtimeDate() : null;
     }
 
     @Named("showtimeTimeFromBooking")
-    default java.time.LocalTime showtimeTimeFromBooking(Booking booking) {
+    public java.time.LocalTime showtimeTimeFromBooking(Booking booking) {
         Showtime showtime = getShowtimeFromBooking(booking);
         return (showtime != null) ? showtime.getShowtimeTime() : null;
     }
 
     @Named("theaterNameFromBooking")
-    default String theaterNameFromBooking(Booking booking) {
+    public String theaterNameFromBooking(Booking booking) {
         Showtime showtime = getShowtimeFromBooking(booking);
         return (showtime != null && showtime.getTheater() != null) ? showtime.getTheater().getName() : null;
     }

@@ -18,5 +18,6 @@ public record BookingDetailResponse(
         BigDecimal totalAmount,
         String status,
         String paymentStatus,
-        String theaterName
+        String theaterName,
+        boolean isAlreadyRequestRefund
 ) {}
