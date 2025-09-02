@@ -250,8 +250,13 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalStateException("You can only cancel a booking up to " + cancellationMinutes + " minutes before the showtime.");
         }
 
+        if (!booking.getBookedSeats().isEmpty()) {
+            showtime.setSeatsAvailable(showtime.getSeatsAvailable() + booking.getBookedSeats().size());
+            booking.getBookedSeats().clear();
+        }
+
         booking.setBookingStatus(BookingStatus.CANCELLED);
-        showtime.setSeatsAvailable(showtime.getSeatsAvailable() + booking.getBookedSeats().size());
+//        showtime.setSeatsAvailable(showtime.getSeatsAvailable() + booking.getBookedSeats().size());
 
         bookingJpaRepository.save(booking);
         showtimeJpaRepository.save(showtime);
