@@ -3,8 +3,7 @@ package com.movie.celestix.common.enums;
 import java.util.Arrays;
 
 public enum ShowtimeStatus {
-    AVAILABLE(1L, "Available"),
-    CANCELLED(2L, "Cancelled");
+    AVAILABLE(1L, "Available");
 
     private final Long id;
     private final String displayName;
