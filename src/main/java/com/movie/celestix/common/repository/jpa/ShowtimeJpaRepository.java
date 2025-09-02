@@ -12,4 +12,5 @@ import java.util.List;
 public interface ShowtimeJpaRepository extends JpaRepository<Showtime, Long> {
     List<Showtime> findByShowtimeDateAndShowtimeTimeBetween(LocalDate date, LocalTime start, LocalTime end);
     boolean existsByMovieId(Long movieId);
+    boolean existsByTheaterId(Long theaterId);
 }

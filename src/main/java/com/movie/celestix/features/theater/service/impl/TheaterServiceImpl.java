@@ -2,6 +2,7 @@ package com.movie.celestix.features.theater.service.impl;
 
 import com.movie.celestix.common.models.Theater;
 import com.movie.celestix.common.repository.jdbc.TheaterJdbcRepository;
+import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
 import com.movie.celestix.common.repository.jpa.TheaterJpaRepository;
 import com.movie.celestix.features.theater.dto.*;
 import com.movie.celestix.features.theater.mapper.TheaterMapper;
@@ -20,6 +21,7 @@ public class TheaterServiceImpl implements TheaterService {
     private final TheaterJpaRepository theaterJpaRepository;
     private final TheaterJdbcRepository theaterJdbcRepository;
     private final TheaterMapper theaterMapper;
+    private final ShowtimeJpaRepository showtimeJpaRepository;
 
     @Override
     @Transactional
@@ -83,6 +85,9 @@ public class TheaterServiceImpl implements TheaterService {
     public void delete(final Long id) {
         if (!theaterJpaRepository.existsById(id)) {
             throw new RuntimeException("Theater with id " + id + " not found");
+        }
+        if (showtimeJpaRepository.existsByTheaterId(id)) {
+            throw new IllegalStateException("Cannot delete theater with id " + id + " because it is associated with one or more showtimes");
         }
         this.theaterJpaRepository.deleteById(id);
     }
