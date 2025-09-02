@@ -5,10 +5,7 @@ import com.movie.celestix.common.models.Configuration;
 import com.movie.celestix.common.models.Movie;
 import com.movie.celestix.common.models.Showtime;
 import com.movie.celestix.common.models.Theater;
-import com.movie.celestix.common.repository.jpa.ConfigurationJpaRepository;
-import com.movie.celestix.common.repository.jpa.MovieJpaRepository;
-import com.movie.celestix.common.repository.jpa.ShowtimeJpaRepository;
-import com.movie.celestix.common.repository.jpa.TheaterJpaRepository;
+import com.movie.celestix.common.repository.jpa.*;
 import com.movie.celestix.features.movies.dto.EnumResponse;
 import com.movie.celestix.features.showtimes.dto.*;
 import com.movie.celestix.features.showtimes.mapper.ShowtimeMapper;
@@ -32,6 +29,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     private final TheaterJpaRepository theaterJpaRepository;
     private final ShowtimeMapper showtimeMapper;
     private final ConfigurationJpaRepository configurationJpaRepository;
+    private final BookedSeatJpaRepository bookedSeatJpaRepository;
 
     @Override
     @Transactional
@@ -105,6 +103,9 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     public void delete(final Long id) {
         if (!showtimeJpaRepository.existsById(id)) {
             throw new RuntimeException("Showtime not found with id: " + id);
+        }
+        if (!bookedSeatJpaRepository.findByShowtimeId(id).isEmpty()) {
+            throw new IllegalStateException("Cannot delete showtime as there are existing bookings.");
         }
         showtimeJpaRepository.deleteById(id);
     }
