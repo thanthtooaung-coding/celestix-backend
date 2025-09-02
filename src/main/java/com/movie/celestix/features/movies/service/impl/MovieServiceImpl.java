@@ -221,7 +221,7 @@ public class MovieServiceImpl implements MovieService {
                             movie.getMoviePosterUrl(),
                             movie.getTrailerUrl(),
                             genres,
-                            popularityRating,
+                            Double.parseDouble(movie.getRating().getDisplayName()),
                             movie.getRating().getDisplayName()
                     );
                 })

@@ -3,11 +3,11 @@ package com.movie.celestix.common.enums;
 import java.util.Arrays;
 
 public enum MovieRating {
-    G(1L, "G"),
-    PG(2L, "PG"),
-    PG_13(3L, "PG-13"),
-    R(4L, "R"),
-    NC_17(5L, "NC-17");
+    G(1L, "1"),
+    PG(2L, "2"),
+    PG_13(3L, "3"),
+    R(4L, "4"),
+    NC_17(5L, "5");
 
     private final Long id;
     private final String displayName;

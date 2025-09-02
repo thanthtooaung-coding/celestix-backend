@@ -2,6 +2,7 @@ package com.movie.celestix.features.moviegenres.service.impl;
 
 import com.movie.celestix.common.models.MovieGenre;
 import com.movie.celestix.common.repository.jpa.MovieGenreJpaRepository;
+import com.movie.celestix.common.repository.jpa.MovieJpaRepository;
 import com.movie.celestix.features.moviegenres.dto.MovieGenreResponse;
 import com.movie.celestix.features.moviegenres.dto.CreateMovieGenreRequest;
 import com.movie.celestix.features.moviegenres.dto.UpdateMovieGenreRequest;
@@ -19,6 +20,7 @@ public class MovieGenreServiceImpl implements MovieGenreService {
 
     private final MovieGenreJpaRepository movieGenreJpaRepository;
     private final MovieGenreMapper movieGenreMapper;
+    private final MovieJpaRepository movieJpaRepository;
 
     @Override
     @Transactional
@@ -57,6 +59,9 @@ public class MovieGenreServiceImpl implements MovieGenreService {
     public void delete(Long id) {
         if (!movieGenreJpaRepository.existsById(id)) {
             throw new RuntimeException("Genre with id " + id + " not found");
+        }
+        if (movieJpaRepository.existsByGenres_Id(id)) {
+            throw new IllegalStateException("Cannot delete genre with id " + id + " because it is associated with one or more movies");
         }
         this.movieGenreJpaRepository.deleteById(id);
     }
