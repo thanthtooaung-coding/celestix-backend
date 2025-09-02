@@ -4,13 +4,11 @@ import com.movie.celestix.common.jwt.JwtUtil;
 import com.movie.celestix.common.models.User;
 import com.movie.celestix.common.repository.jdbc.UserJdbcRepository;
 import com.movie.celestix.common.repository.jpa.UserJpaRepository;
-import com.movie.celestix.features.auth.dto.LoginResponse;
-import com.movie.celestix.features.auth.dto.RegisterRequest;
-import com.movie.celestix.features.auth.dto.UpdateMeRequest;
-import com.movie.celestix.features.auth.dto.UserResponse;
+import com.movie.celestix.features.auth.dto.*;
 import com.movie.celestix.features.auth.service.AuthService;
 import com.movie.celestix.features.booking.dto.MyBookingsResponse;
 import com.movie.celestix.features.booking.service.BookingService;
+import com.movie.celestix.features.email.service.EmailService;
 import com.movie.celestix.features.media.service.MediaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +20,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final MediaService mediaService;
     private final BookingService bookingService;
+    private final EmailService emailService;
 
     @Override
     public LoginResponse authenticate(final String email, final String rawPassword) {
@@ -61,6 +64,8 @@ public class AuthServiceImpl implements AuthService {
                         hashedPassword,
                         request.email(),
                         request.role(),
+                        null,
+                        null,
                         null
                 )
         );
@@ -102,5 +107,40 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public MyBookingsResponse getMyBookings(String email) {
         return bookingService.retrieveMyBookings(email);
+    }
+
+    @Override
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        User user = userJpaRepository.findByEmail(request.email())
+                .orElseThrow(() -> new IllegalArgumentException("User with email " + request.email() + " not found."));
+
+        String otp = String.format("%06d", new Random().nextInt(999999));
+        user.setOtp(otp);
+        user.setOtpGeneratedTime(LocalDateTime.now());
+        userJpaRepository.save(user);
+
+        emailService.sendOtpEmail(user.getEmail(), otp);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userJpaRepository.findByEmail(request.email())
+                .orElseThrow(() -> new IllegalArgumentException("User with email " + request.email() + " not found."));
+
+        if (user.getOtp() == null || user.getOtpGeneratedTime() == null || !user.getOtp().equals(request.otp())) {
+            throw new IllegalArgumentException("Invalid OTP.");
+        }
+
+        long minutes = Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).toMinutes();
+        if (minutes > 5) {
+            throw new IllegalArgumentException("OTP has expired.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setOtp(null);
+        user.setOtpGeneratedTime(null);
+        userJpaRepository.save(user);
     }
 }

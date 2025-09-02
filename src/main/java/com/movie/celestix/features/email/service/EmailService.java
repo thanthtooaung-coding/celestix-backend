@@ -6,4 +6,5 @@ import com.movie.celestix.features.email.dto.ReminderEmailDetails;
 public interface EmailService {
     void sendBookingConfirmationEmail(EmailDetails emailDetails);
     void sendShowtimeReminderEmail(ReminderEmailDetails emailDetails);
+    void sendOtpEmail(String to, String otp);
 }

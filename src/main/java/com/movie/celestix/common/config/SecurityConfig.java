@@ -28,7 +28,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/public/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/public/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password").permitAll()
 //                .requestMatchers("/api/v1/admins/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )

@@ -61,4 +61,16 @@ public class AuthController {
     public ResponseEntity<ApiResponse<MyBookingsResponse>> getMyBookings(@AuthenticationPrincipal UserDetails userDetails) {
         return ApiResponse.ok(authService.getMyBookings(userDetails.getUsername()), "User bookings retrieved successfully");
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ApiResponse.ok(null, "Password reset OTP sent to your email.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ApiResponse.ok(null, "Password has been reset successfully.");
+    }
 }

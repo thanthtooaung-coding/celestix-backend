@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
@@ -30,4 +32,8 @@ public class User extends MasterData {
     private Role role;
 
     private String profileUrl;
+
+    private String otp;
+
+    private LocalDateTime otpGeneratedTime;
 }
