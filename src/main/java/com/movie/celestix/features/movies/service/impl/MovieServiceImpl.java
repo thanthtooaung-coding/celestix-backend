@@ -101,6 +101,9 @@ public class MovieServiceImpl implements MovieService {
         if (!movieJpaRepository.existsById(id)) {
             throw new RuntimeException("Movie with id " + id + " not found");
         }
+        if (showtimeJpaRepository.existsByMovieId(id)) {
+            throw new IllegalStateException("Cannot delete movie with id " + id + " because it is associated with one or more showtimes");
+        }
         movieJpaRepository.deleteById(id);
     }
 
