@@ -49,6 +49,14 @@ public class FoodService {
             food.setDescription(ff.getDescription());
             food.setPhotoUrl(ff.getPhotoUrl());
             foodRepo.save(food);
+
+            if (ff.getPrice() != 0.0) {
+                List<Combo> combosToUpdate = comboRepo.findByFoods_Id(food.getId());
+                for (Combo combo : combosToUpdate) {
+                    recalculateComboPrice(combo);
+                    comboRepo.save(combo);
+                }
+            }
         }
     }
 
@@ -163,5 +171,23 @@ public class FoodService {
     @Transactional
     public void deleteCombo(Long id) {
         comboRepo.deleteById(id);
+    }
+
+    private void recalculateComboPrice(Combo combo) {
+        List<Food> selectedFoods = combo.getFoods();
+        double sumPrice = selectedFoods.stream()
+                .mapToDouble(Food::getPrice)
+                .sum();
+
+        double discountRate = switch (selectedFoods.size()) {
+            case 2 -> 0.03;
+            case 3 -> 0.05;
+            case 4 -> 0.08;
+            case 5 -> 0.10;
+            default -> 0.0;
+        };
+
+        double finalPrice = sumPrice * (1 - discountRate);
+        combo.setComboPrice(finalPrice);
     }
 }
